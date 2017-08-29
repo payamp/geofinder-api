@@ -24,20 +24,6 @@ public class WebConfig {
 		staticFiles.location("/public");
 
 		path("/api", () -> {
-
-			get("/name/suggest", (req, res) -> {
-
-				String name = req.queryParams("name");
-				String sortBy = req.queryParams("sort");
-				
-				// if name and sort query params are set (sort) otherwise don't sort.
-				if ( ! Strings.isNullOrEmpty(name) && ! Strings.isNullOrEmpty(sortBy)) {
-					return LocationFinderController.nameSuggestSimpleSort(req, res, locationFinderService);
-				} else {
-					return LocationFinderController.nameSuggestSimple(req, res, locationFinderService);
-				}
-			});
-			
 			
 			get("/geo-name-suggest", (req,res) -> {
 				
@@ -96,10 +82,12 @@ public class WebConfig {
 			
 			
 			/**
-			 * parameters: category (String)
-			 *             subcategory (String)
+			 * url parameters: 
+			 * 		category (String)
+			 * 		subcategory (String)
+			 * 		num_results: int (optional, default 100)
 			 */
-			get("/geo-bbox-filter-in-category", (req,res) -> {
+			get("/geo-bbox-filter-on-category", (req,res) -> {
 				
 				String lllat = req.queryParams("lllat");
 				String lllng = req.queryParams("lllng");
@@ -107,14 +95,13 @@ public class WebConfig {
 				String urlng = req.queryParams("urlng");
 				String category = req.queryParams("category");
 				String subcategory = req.queryParams("subcategory");
-				String numResultsStr = req.queryParamOrDefault("num_results", "50");
+				String numResultsStr = req.queryParamOrDefault("num_results", "100");
 				
 				int numResults = 20;
 				
 				try {
 					numResults = Integer.parseInt(numResultsStr);
 				} catch (NumberFormatException e) {}
-				
 				
 				res.status(200);
 				res.type("application/json");

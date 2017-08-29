@@ -40,7 +40,7 @@ public class DseConfig {
 	@Bean 
 	public DseCluster dseCluster() {
 
-		// This type of logic would never really make sense in production.. 
+		// This type of logic would not really make sense in production (this is a demo). 
 
 		logger.info("DseConfig : connecting to cluster");
 		
@@ -48,20 +48,9 @@ public class DseConfig {
 			this.dseCluster = DseCluster.builder()
 					.addContactPoint("localhost").build();
 		} else {
+			
 			if( App.CASSANDRA_USER != null && App.CASSANDRA_PASS != null ){
 				
-//				SSLContext sslcontext = null;
-//				try {
-//				sslcontext = SSLContext.custom()
-//		                .loadTrustMaterial(
-//		                		new File("truststore.jks"),
-//		                		App.CASSANDRA_PASS.toCharArray(),
-//		                        new TrustSelfSignedStrategy())
-//		                .build();
-//				} catch (Exception e){
-//					e.printStackTrace();
-//				}
-//				
 				if( App.USE_SSL ){
 					SSLContext sslcontext = null;
 					try {
@@ -75,6 +64,7 @@ public class DseConfig {
 						e.printStackTrace();
 					}
 					
+					@SuppressWarnings("deprecation")
 					JdkSSLOptions sslOptions = RemoteEndpointAwareJdkSSLOptions.builder()
 							  .withSSLContext(sslcontext)
 							  .build();
@@ -95,8 +85,9 @@ public class DseConfig {
 				}
 				
 			} else {
-				this.dseCluster = DseCluster.builder()
-						.addContactPoint(App.HOST).build();
+				
+				this.dseCluster = DseCluster.builder().addContactPoint(App.HOST).build();
+				
 			}
 		}
 		return this.dseCluster;
@@ -114,35 +105,10 @@ public class DseConfig {
 	
 	@PreDestroy
 	public void cleanUp() {
-		//System.out.println("Shutting down dseSession and dseCluster");
 		logger.info("Shutting down dseSession and dseCluster");
 		dseSession.close();
 		dseCluster.close();
 	}
 	
-	
-	private static SSLContext getSSLContext()  throws NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, UnrecoverableKeyException, KeyManagementException {
-		FileInputStream tsf = null;
-        //FileInputStream ksf = null;
-        SSLContext ctx = null;
-        try
-        {
-            tsf = new FileInputStream("truststore.jks");
-            ctx = SSLContext.getInstance("SSL");
-            KeyStore ts = KeyStore.getInstance("JKS");
-            ts.load(tsf, App.CASSANDRA_PASS.toCharArray());
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(ts);
-            ctx.init(null, tmf.getTrustManagers(), new SecureRandom());
-            
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-        finally
-        {
-        	tsf.close();
-        }
-		return ctx;
-	}
 	
 }

@@ -33,7 +33,6 @@ public class App
     public static void main( String[] args ) throws ParseException, IOException
     {
         
-    	
         CommandLineParser parser = new DefaultParser();
         Options options = cliOptions();
         CommandLine cmd = parser.parse( options, args);
@@ -54,6 +53,7 @@ public class App
         if ( cmd.hasOption("ssl"))
         	USE_SSL = true;
         
+        // if the HOST is null or empty, just print the usage. 
         if( Strings.isNullOrEmpty(HOST) ){
         	
         	HelpFormatter formatter = new HelpFormatter();

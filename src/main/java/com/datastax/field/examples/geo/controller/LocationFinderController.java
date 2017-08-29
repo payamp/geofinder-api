@@ -1,13 +1,9 @@
 package com.datastax.field.examples.geo.controller;
 
 import com.datastax.field.examples.geo.service.LocationFinderService;
-import com.datastax.field.examples.geo.util.CQLUtil;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import spark.Request;
-import spark.Response;
 import spark.utils.StringUtils;
 
 public class LocationFinderController {
@@ -18,80 +14,6 @@ public class LocationFinderController {
 	public static final double MAX_LAT    = 90.0d;
 	public static final double MIN_LNG    = -180.0d;
 	public static final double MAX_LNG    = 180.0d;
-	
-	
-	public static String nameSuggestSimple(Request req, Response res, LocationFinderService locationFinderService) {
-
-		String name = req.queryParams("name");
-
-		Gson gson = new Gson();
-		JsonObject response = new JsonObject();
-
-		/*
-		 * Make sure the name query param is between 1 and 100 characters long. 
-		 */
-		if (name != null && name.length() > 1 && name.length() <= 100) {
-
-			JsonArray nameList = locationFinderService.getPlacesContainingName(name);
-			String query = locationFinderService.getPlacesContainingNameQuery(name);
-			response.add("names", nameList);
-			response.addProperty("query", query);
-
-			res.status(200);
-			res.type("application/json");
-			return gson.toJson(response);
-
-		} else {
-
-			if (name.length() > 100) {
-
-				response.addProperty("error", "name parameter was too long, at most 100 characters");
-
-			} else {
-
-				response.addProperty("error", "missing property (name)");
-
-			}
-			response.addProperty("url", "/api/name/suggest?name=<string>");
-			res.status(200);
-			res.type("application/json");
-			return gson.toJson(response);
-		}
-	}
-
-	public static Object nameSuggestSimpleSort(Request req, Response res, LocationFinderService locationFinderService) {
-
-		String name = req.queryParams("name");
-		String sort = req.queryParams("sort");
-
-		boolean isValidSort = CQLUtil.isValidSort(sort);
-		
-		Gson gson = new Gson();
-		JsonObject response = new JsonObject();
-		
-		if( !isValidSort )
-			response.addProperty("message", "invalid sort");
-		
-		if (name != null && name.length() > 1 && name.length() <= 100  && isValidSort ) {
-			
-			JsonArray nameList = locationFinderService.getPlacesContainingNameSort(name, sort);
-			String query = locationFinderService.getPlacesContainingNameSortQuery(name, sort);
-			response.add("names", nameList);
-			response.addProperty("query", query);
-
-			res.status(200);
-			res.type("application/json");
-			return gson.toJson(response);
-			
-			
-		} else {
-			response.addProperty("message", "missing property (name)");
-		}
-		
-		res.status(200);
-		res.type("application/json");
-		return gson.toJson(response);
-	}
 	
 	
 	public static JsonObject geoNameSuggestWithPointAndRadius( LocationFinderService service, String name, String lat, String lng, String radius  ){
@@ -156,6 +78,7 @@ public class LocationFinderController {
 		if( messages.size() == 0){
 			messages.add("OK");
 		}
+		
 		
 		response.addProperty("success", isValidRequest);
 		response.add("messages", messages);
@@ -248,189 +171,69 @@ public class LocationFinderController {
 	
 	public static String geoFilterPivotOnCateogory( LocationFinderService service, String lllat, String lllng, String urlat, String urlng  ){
 		
-		double lllatDouble = 0.0d;
-		double lllngDouble = 0.0d;
-		double urlatDouble = 0.0d;
-		double urlngDouble = 0.0d;
+		JsonObject response = validateBoundingBox(lllat, lllng, urlat, urlng);
 		
-		boolean isValidRequest = true;
-		
-		JsonArray messages = new JsonArray();
-		
-		// make sure the lllat is a double and within bounds. 
-		try {
-			lllatDouble = Double.parseDouble(lllat);
-			if( lllatDouble < MIN_LAT  || lllatDouble > MAX_LAT ){
-				isValidRequest = false;
-				messages.add("lllat: (lower left latitude) was out of range (" +  MIN_LAT + " TO " + MAX_LAT + ") : " + lllat );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("lllat does not contain a parsable double: " + lllat);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("lllat parameter was null");
-		}
-		
-		
-		// make sure the lllng is a double and within bounds. 
-		try {
-			lllngDouble = Double.parseDouble(lllng);
-			if( lllatDouble < MIN_LNG  || lllatDouble > MAX_LNG ){
-				isValidRequest = false;
-				messages.add("lllng: (lower left latitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + ") : " + lllng );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("lllng does not contain a parsable double: " + lllng);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("lllng parameter was null");
-		}
-		
-		
-		// make sure the lllat is a double and within bounds. 
-		try {
-			urlatDouble = Double.parseDouble(urlat);
-			if( urlatDouble < MIN_LAT  || urlatDouble > MAX_LAT ){
-				isValidRequest = false;
-				messages.add("urlat: (upper-right latitude) was out of range (" +  MIN_LAT + " TO " + MAX_LAT + ") : " + urlat );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("urlat does not contain a parsable double: " + urlat);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("urlat parameter was null");
-		}
-		
-		
-		
-		// make sure the urlng is a double and within bounds. 
-		try {
-			urlngDouble = Double.parseDouble(urlng);
-			if( urlatDouble < MIN_LNG  || urlatDouble > MAX_LNG ){
-				isValidRequest = false;
-				messages.add("urlng: (upper-right latitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + ") : " + urlng );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("urlng does not contain a parsable double: " + urlng);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("urlng parameter was null");
-		}
-		
-		
-		if( messages.size() == 0){
-			messages.add("OK");
-		}
-		
-		
-		if ( isValidRequest ){
-			String resp = service.geoFilterPivotOnCateogory(lllatDouble, lllngDouble, urlatDouble, urlngDouble);
-			return resp;
+		if ( response.get("success").getAsBoolean() ){
+			
+			double lllatDouble = Double.parseDouble(lllat);
+			double lllngDouble = Double.parseDouble(lllng);
+			double urlatDouble = Double.parseDouble(urlat);
+			double urlngDouble = Double.parseDouble(urlng);
+			
+			return service.geoFilterPivotOnCateogory(lllatDouble, lllngDouble, urlatDouble, urlngDouble);
+			
 		} else {
-			JsonObject response = new JsonObject();
-			response.addProperty("success", isValidRequest);
-			response.add("messages", messages);
+			
 			return response.toString();
 		}
+		
 	}
 	
 	
-public static String geoFilterPivotOnCateogoryAndSubcategory( LocationFinderService service, String lllat, String lllng, String urlat, String urlng  ){
+	public static String geoFilterPivotOnCateogoryAndSubcategory( LocationFinderService service, String lllat, String lllng, String urlat, String urlng  ){
+
+		JsonObject response = validateBoundingBox(lllat, lllng, urlat, urlng);
 		
-		double lllatDouble = 0.0d;
-		double lllngDouble = 0.0d;
-		double urlatDouble = 0.0d;
-		double urlngDouble = 0.0d;
-		
-		boolean isValidRequest = true;
-		
-		JsonArray messages = new JsonArray();
-		
-		// make sure the lllat (Lower Left Latitude) is a double and within bounds. 
-		try {
-			lllatDouble = Double.parseDouble(lllat);
-			if( lllatDouble < MIN_LAT  || lllatDouble > MAX_LAT ){
-				isValidRequest = false;
-				messages.add("lllat: (lower left latitude) was out of range (" +  MIN_LAT + " TO " + MAX_LAT + ") : " + lllat );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("lllat does not contain a parsable double: " + lllat);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("lllat parameter was null");
-		}
-		
-		
-		// make sure the lllng (Lower Left Longitude) is a double and within bounds. 
-		try {
-			lllngDouble = Double.parseDouble(lllng);
-			if( lllatDouble < MIN_LNG  || lllatDouble > MAX_LNG ){
-				isValidRequest = false;
-				messages.add("lllng: (lower left latitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + ") : " + lllng );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("lllng does not contain a parsable double: " + lllng);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("lllng parameter was null");
-		}
-		
-		
-		// make sure the urlat (Upper Right Latitude) is a double and within bounds. 
-		try {
-			urlatDouble = Double.parseDouble(urlat);
-			if( urlatDouble < MIN_LAT  || urlatDouble > MAX_LAT ){
-				isValidRequest = false;
-				messages.add("urlat: (upper-right latitude) was out of range (" +  MIN_LAT + " TO " + MAX_LAT + ") : " + urlat );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("urlat does not contain a parsable double: " + urlat);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("urlat parameter was null");
-		}
-		
-		// make sure the urlng (Upper Right Longitude) is a double and within bounds. 
-		try {
-			urlngDouble = Double.parseDouble(urlng);
-			if( urlatDouble < MIN_LNG  || urlatDouble > MAX_LNG ){
-				isValidRequest = false;
-				messages.add("urlng: (upper-right latitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + ") : " + urlng );
-			}
-		} catch (NumberFormatException nfe) {
-			isValidRequest = false;
-			messages.add("urlng does not contain a parsable double: " + urlng);
-		} catch ( NullPointerException npe ) {
-			isValidRequest = false;
-			messages.add("urlng parameter was null");
-		}
-		
-		
-		if( messages.size() == 0){
-			messages.add("OK");
-		}
-		
-		
-		if ( isValidRequest ){
-			String resp = service.geoFilterPivotOnCateogoryAndSubCategory(lllatDouble, lllngDouble, urlatDouble, urlngDouble);
-			return resp;
+		if ( response.get("success").getAsBoolean() ){
+			
+			double lllatDouble = Double.parseDouble(lllat);
+			double lllngDouble = Double.parseDouble(lllng);
+			double urlatDouble = Double.parseDouble(urlat);
+			double urlngDouble = Double.parseDouble(urlng);
+			
+			return service.geoFilterPivotOnCateogoryAndSubCategory(lllatDouble, lllngDouble, urlatDouble, urlngDouble);
+			
 		} else {
-			JsonObject response = new JsonObject();
-			response.addProperty("success", isValidRequest);
-			response.add("messages", messages);
 			return response.toString();
 		}
+		
 	}
 	
 	public static String geoFilterLocationsOnCateogoryAndSubcategory( LocationFinderService service, String category, String subcategory, int numResults, String lllat, String lllng, String urlat, String urlng  ){
 		
+		JsonObject response = validateBoundingBox(lllat, lllng, urlat, urlng);
+		
+		if ( response.get("success").getAsBoolean() ){
+			
+			double lllatDouble = Double.parseDouble(lllat);
+			double lllngDouble = Double.parseDouble(lllng);
+			double urlatDouble = Double.parseDouble(urlat);
+			double urlngDouble = Double.parseDouble(urlng);
+			
+			
+			String query = service.geoFilterLocationsOnCateogoryAndOrSubcategoryQuery(category, subcategory, numResults, lllatDouble, lllngDouble, urlatDouble, urlngDouble);
+			JsonArray locations = service.geoFilterLocationsOnCateogoryAndOrSubcategory(category, subcategory, numResults, lllatDouble, lllngDouble, urlatDouble, urlngDouble);
+			response.addProperty("query", query);
+			response.add("locations", locations);
+			
+		}
+		
+		return response.toString();
+	}
+	
+	
+	private static JsonObject validateBoundingBox( String lllat, String lllng, String urlat, String urlng ){
+		
 		double lllatDouble = 0.0d;
 		double lllngDouble = 0.0d;
 		double urlatDouble = 0.0d;
@@ -459,9 +262,9 @@ public static String geoFilterPivotOnCateogoryAndSubcategory( LocationFinderServ
 		// make sure the lllng (Lower Left Longitude) is a double and within bounds. 
 		try {
 			lllngDouble = Double.parseDouble(lllng);
-			if( lllatDouble < MIN_LNG  || lllatDouble > MAX_LNG ){
+			if( lllngDouble < MIN_LNG  || lllngDouble > MAX_LNG ){
 				isValidRequest = false;
-				messages.add("lllng: (lower left latitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + ") : " + lllng );
+				messages.add("lllng: (lower left longitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + "), provided: " + lllng );
 			}
 		} catch (NumberFormatException nfe) {
 			isValidRequest = false;
@@ -477,7 +280,7 @@ public static String geoFilterPivotOnCateogoryAndSubcategory( LocationFinderServ
 			urlatDouble = Double.parseDouble(urlat);
 			if( urlatDouble < MIN_LAT  || urlatDouble > MAX_LAT ){
 				isValidRequest = false;
-				messages.add("urlat: (upper-right latitude) was out of range (" +  MIN_LAT + " TO " + MAX_LAT + ") : " + urlat );
+				messages.add("urlat: (upper-right latitude) was out of range (" +  MIN_LAT + " TO " + MAX_LAT + "), provided: " + urlat );
 			}
 		} catch (NumberFormatException nfe) {
 			isValidRequest = false;
@@ -490,9 +293,9 @@ public static String geoFilterPivotOnCateogoryAndSubcategory( LocationFinderServ
 		// make sure the urlng (Upper Right Longitude) is a double and within bounds. 
 		try {
 			urlngDouble = Double.parseDouble(urlng);
-			if( urlatDouble < MIN_LNG  || urlatDouble > MAX_LNG ){
+			if( urlngDouble < MIN_LNG  || urlngDouble > MAX_LNG ){
 				isValidRequest = false;
-				messages.add("urlng: (upper-right latitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + ") : " + urlng );
+				messages.add("urlng: (upper-right longitude) was out of range (" +  MIN_LNG + " TO " + MAX_LNG + "), provided: " + urlng );
 			}
 		} catch (NumberFormatException nfe) {
 			isValidRequest = false;
@@ -507,15 +310,10 @@ public static String geoFilterPivotOnCateogoryAndSubcategory( LocationFinderServ
 			messages.add("OK");
 		}
 		
-		
-		if ( isValidRequest ){
-			String resp = service.geoFilterLocationsOnCateogoryAndOrSubcategory(category, subcategory, numResults, lllatDouble, lllngDouble, urlatDouble, urlngDouble);
-			return resp;
-		} else {
-			JsonObject response = new JsonObject();
-			response.addProperty("success", isValidRequest);
-			response.add("messages", messages);
-			return response.toString();
-		}
+		JsonObject response = new JsonObject();
+		response.addProperty("success", isValidRequest );
+		response.add("messages", messages);
+		return response;
 	}
+	
 }
