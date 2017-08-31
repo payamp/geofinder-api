@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "standing up geofinder-api"
+#standup the geofinder-api 
+mvn clean package
+nohup java -jar target/geofinder-api.jar -h localhost &
