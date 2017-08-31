@@ -16,14 +16,14 @@ Will insert a demo video here.
 DSE running, and already loaded the sample data into DSE that is backed by DSE Search.
 - Java 8 installed 
 - maven is installed (only if you are building the project)
-- sdf
+
 
 
 
 
 **build:**
 
-`git clone <url>`
+`git clone`
 
 `mvn clean package`
 
@@ -46,6 +46,7 @@ Connecting to remote DSE instance w/ username, password authentication and SSL
 
 `java -jar target/geofinder-api.jar -h 192.168.1.190 -u cassandra -p ChangeMe123 -ssl`
 
+This expects a valid truststore.jks file to be in the current working directory. 
 
 ---
 
@@ -180,15 +181,57 @@ GET /api/geo-facet-category-subcategory?parameters
 
 ## Searching for a particular category or subcategory of POI within a map extent. 
 
+```
+GET /api/geo-bbox-filter-on-category?parameters
+```
 
+| Field       | Description                     | Required |   min / max    |
+|------------ |---------------------------------|----------| -------------- |
+| category    | Category                        | YES      |  N/A           |
+| subcategory | Subcategory                     | NO       |  N/A           |
+| num_records | Number of records (default 20)  | NO       |                |
+| lllat       | Lower Left Latitude             | YES      |  -90.0 / 90.0  |
+| lllng       | Lower Left Longitude            | YES      | -180.0 / 180.0 |
+| urlat       | Upper Right Latitude            | YES      |  -90.0 / 90.0  |
+| urlng       | Upper Right Longitude           | YES      | -180.0 / 180.0 |
 
+###sample response (truncated):
+
+```
+{
+  "category,subcategory": [
+    {
+      "field": "category",
+      "value": "Airline",
+      "count": 116,
+      "pivot": [
+        {
+          "field": "subcategory",
+          "value": "",
+          "count": 116
+        }
+      ]
+    },
+    {
+      "field": "category",
+      "value": "Airport",
+      "count": 23,
+      "pivot": [
+        {
+          "field": "subcategory",
+          "value": "",
+          "count": 23
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Reference:
 
-1° of Latitude (1/360th of the Earth's Polar circumference) is 110.5743 km
 
-DSE uses degrees so as an estimate 0.0090436928 will be used per kilometer. This will not be accurate at the polls but its easy.
-[lat lon info](http://calgary.rasc.ca/latlong.htm) 
+calculation on converting how many degrees will be [lat lon info](http://calgary.rasc.ca/latlong.htm) 
 
 ```javascript
 theta = latitude;
