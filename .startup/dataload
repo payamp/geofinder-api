@@ -7,7 +7,7 @@ curl -O 'https://s3-us-west-1.amazonaws.com/fieldops-public-download/simplegeo_l
 cqlsh -f cql_schema.cql
 
 # extract SSTables to data directory
-cd /var/lib/cassandra/data/simplegeo/locations*; tar -zxvf /tmp/geofinder-api/simplegeo_locations_SSTables-DSE5.1.tgz
+pushd /var/lib/cassandra/data/simplegeo/locations*; tar -zxvf /tmp/geofinder-api/simplegeo_locations_SSTables-DSE5.1.tgz; nodetool refresh simplegeo locations; popd
 nodetool repair simplegeo locations
 
 # create core and reindex
