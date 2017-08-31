@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<schema name="autoSolrSchema" version="1.5">
+  <types>
+    <fieldType class="org.apache.solr.schema.StrField" name="StrField"/>
+    <fieldType class="org.apache.solr.schema.TextField" name="TextField">
+      <analyzer>
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    <fieldType name="location_rpt"   class="solr.SpatialRecursivePrefixTreeFieldType"
+       distErrPct="0.025"
+       maxDistErr="0.000009"
+       units="degrees"
+     />
+  </types>
+  <fields>
+    <field indexed="true" multiValued="false" name="id" stored="true" type="StrField"/>
+    <field indexed="false" multiValued="false" name="name" stored="true" type="StrField" />
+    <field indexed="true" multiValued="false" name="name_lowercase" stored="true" type="StrField" docValues="true"/>
+    <field indexed="true" multiValued="false" name="province" stored="true" type="StrField" docValues="true"/>
+    <field indexed="true" multiValued="true" name="tags" stored="true" type="StrField" docValues="true"/>
+    <field indexed="false" multiValued="false" name="menulink" stored="true" type="StrField" />
+    <field indexed="true" multiValued="false" name="subcategory" stored="true" type="StrField" docValues="true"/>
+    <field indexed="false" multiValued="false" name="source" stored="true" type="StrField" />
+    <field indexed="true" multiValued="false" name="city" stored="true" type="StrField" docValues="true"/>
+    <field indexed="true" multiValued="false" name="post_code" stored="true" type="StrField" docValues="true"/>
+    <field indexed="true" multiValued="false" name="phone" stored="true" type="StrField" />
+    <field indexed="true" multiValued="false" name="type" stored="true" type="StrField" docValues="true"/>
+    <field indexed="true" multiValued="false" name="address" stored="true" type="StrField"/>
+    <field indexed="false" multiValued="false" name="website" stored="true" type="StrField"/>
+    <field indexed="true" multiValued="false" name="category" stored="true" type="StrField" docValues="true"/>
+    <field indexed="true" multiValued="false" name="geo" stored="true" type="location_rpt"/>
+  </fields>
+  <uniqueKey>id</uniqueKey>
+</schema>

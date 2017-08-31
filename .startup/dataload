@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# download SSTables from s3
+curl -O 'https://s3-us-west-1.amazonaws.com/fieldops-public-download/simplegeo_locations_SSTables-DSE5.1.tgz'
+
+# create Cassandra Schema
+cqlsh -f cql_schema.cql
+
+# extract SSTables to data directory
+pushd /var/lib/cassandra/data/simplegeo/locations*; tar -zxvf /tmp/geofinder-api/simplegeo_locations_SSTables-DSE5.1.tgz; nodetool refresh simplegeo locations; popd
+nodetool repair simplegeo locations
+
+# create core and reindex
+dsetool create_core simplegeo.locations schema=schema.xml solrconfig=solrconfig.xml reindex=true distributed=true
