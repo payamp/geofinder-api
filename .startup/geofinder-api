@@ -4,4 +4,4 @@ echo "standing up geofinder-api"
 #standup the geofinder-api
 apt-get install -y maven
 mvn clean package
-nohup java -jar target/geofinder-api.jar -h localhost &
+nohup java -jar target/geofinder-api.jar -h node0 &
