@@ -14,6 +14,7 @@ pushd /mnt/ephemeral/cassandra/data/simplegeo/locations*; tar -zxvf /tmp/geofind
 rm -f /tmp/geofinder-api/simplegeo_locations_SSTables-DSE5.1.tgz
 if [ `hostname` == 'node0' ]
 then
+  sleep 60
   nodetool repair simplegeo locations
 fi
 
