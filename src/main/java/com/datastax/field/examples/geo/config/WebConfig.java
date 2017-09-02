@@ -4,6 +4,7 @@ import static spark.Spark.exception;
 import static spark.Spark.get;
 import static spark.Spark.path;
 import static spark.Spark.staticFiles;
+import static spark.Spark.port;
 import com.datastax.field.examples.geo.controller.LocationFinderController;
 import com.datastax.field.examples.geo.service.LocationFinderService;
 import com.google.common.base.Strings;
@@ -16,6 +17,7 @@ public class WebConfig {
 
 	public WebConfig(LocationFinderService lfService) {
 		this.locationFinderService = lfService;
+		port(9000);
 		setupRoutes();
 	}
 

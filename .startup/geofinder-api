@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "standing up geofinder-api"
+#standup the geofinder-api
+apt-get install -y maven
+mvn clean package
+if [ `hostname` == 'node0' ]
+then
+  nohup java -jar target/geofinder-api.jar -h node0 &
+fi
