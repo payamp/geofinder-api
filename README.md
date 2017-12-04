@@ -48,6 +48,12 @@ Connecting to remote DSE instance w/ username, password authentication and SSL
 
 This expects a valid truststore.jks file to be in the current working directory. 
 
+The web app is exposed on port 9000
+
+If you are running this from assethub, you will need to point your web browser at:
+
+http://node0_ip:9000
+
 ---
 
 
