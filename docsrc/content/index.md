@@ -1,9 +1,9 @@
-
-## Important!
-
-* Use Instance Type:  **m3.2xlarge**
-  
-* Virtual Nodes: **1**
+---
+date: 2017-05-19T21:52:39
+title: DSE Spark Rest API Example
+type: index
+weight: 0
+---
 
 Geofinder API Script
 ===================
