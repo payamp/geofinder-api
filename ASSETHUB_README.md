@@ -2,7 +2,7 @@
 
 * Use Instance Type:  **m3.2xlarge**
   
-* Virtual Nodes: **1**
+* Virtual Nodes: **4**
 
 Geofinder API Script
 ===================
