@@ -1,33 +1,15 @@
 package com.datastax.field.examples.geo.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-
-import javax.annotation.PreDestroy;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.ssl.SSLContexts;
+import com.datastax.driver.dse.DseCluster;
+import com.datastax.driver.dse.DseSession;
+import com.datastax.driver.dse.auth.DsePlainTextAuthProvider;
+import com.datastax.field.examples.geo.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.datastax.driver.core.JdkSSLOptions;
-import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
-import com.datastax.driver.dse.DseCluster;
-import com.datastax.driver.dse.DseSession;
-import com.datastax.driver.dse.auth.DsePlainTextAuthProvider;
-import com.datastax.field.examples.geo.App;
+import javax.annotation.PreDestroy;
 
 @Configuration
 public class DseConfig {
@@ -36,60 +18,42 @@ public class DseConfig {
 	
 	private DseSession dseSession;
 	final Logger logger = LoggerFactory.getLogger(DseConfig.class);
-	
+
+
+	/**
+	 * reference:  https://docs.datastax.com/en/developer/java-driver/3.6/manual/ssl/
+	 *
+	 * @return DseCluster
+	 */
 	@Bean 
 	public DseCluster dseCluster() {
 
-		// This type of logic would not really make sense in production (this is a demo). 
+		// This type of logic may not really make sense in production (this is a demo).
 
 		logger.info("DseConfig : connecting to cluster");
-		
+
+		DseCluster.Builder builder = DseCluster.builder();
+
 		if( App.HOST == null || App.HOST.equals("") ){
-			this.dseCluster = DseCluster.builder()
-					.addContactPoint("localhost").build();
+
+			this.dseCluster = builder.addContactPoint("localhost").build();
+
 		} else {
 			
 			if( App.CASSANDRA_USER != null && App.CASSANDRA_PASS != null ){
-				
+
+				builder.addContactPoint(App.HOST)
+						.withAuthProvider(new DsePlainTextAuthProvider(App.CASSANDRA_USER, App.CASSANDRA_PASS));
+
 				if( App.USE_SSL ){
-					SSLContext sslcontext = null;
-					try {
-					sslcontext = SSLContexts.custom()
-			                .loadTrustMaterial(
-			                		new File("truststore.jks"),
-			                		App.CASSANDRA_PASS.toCharArray(),
-			                        new TrustSelfSignedStrategy())
-			                .build();
-					} catch (Exception e){
-						e.printStackTrace();
-					}
-					
-					@SuppressWarnings("deprecation")
-					JdkSSLOptions sslOptions = RemoteEndpointAwareJdkSSLOptions.builder()
-							  .withSSLContext(sslcontext)
-							  .build();
-					
-					this.dseCluster = DseCluster.builder()
-							.addContactPoint( App.HOST )
-							.withSSL(sslOptions)
-							.withAuthProvider(new DsePlainTextAuthProvider(App.CASSANDRA_USER, App.CASSANDRA_PASS))
-							.build();
-					
-				} else {
-					
-					this.dseCluster = DseCluster.builder()
-							.addContactPoint( App.HOST )
-							.withAuthProvider(new DsePlainTextAuthProvider(App.CASSANDRA_USER, App.CASSANDRA_PASS))
-							.build();
-					
-				}
-				
-			} else {
-				
-				this.dseCluster = DseCluster.builder().addContactPoint(App.HOST).build();
-				
+					builder.withSSL();
+				 }
+
+				this.dseCluster = builder.build();
 			}
+
 		}
+
 		return this.dseCluster;
 	}
 	

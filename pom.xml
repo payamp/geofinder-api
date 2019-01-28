@@ -10,6 +10,7 @@
 
 	<properties>
 		<jdk.version>1.8</jdk.version>
+		<spark.core.version>2.7.2</spark.core.version>
 		<dse.driver.version>1.2.4</dse.driver.version>
 		<dse.mapper.version>3.2.0</dse.mapper.version>
 		<jackson.core.version>2.8.9</jackson.core.version>
@@ -46,7 +47,7 @@
 		<dependency>
 			<groupId>com.sparkjava</groupId>
 			<artifactId>spark-core</artifactId>
-			<version>2.6.0</version>
+			<version>${spark.core.version}</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
@@ -112,11 +113,11 @@
 			<version>${spring.context.version}</version>
 		</dependency>
 		
-		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>${httpcomponents.version}</version>
-		</dependency>
+		<!--<dependency>-->
+		    <!--<groupId>org.apache.httpcomponents</groupId>-->
+		    <!--<artifactId>httpclient</artifactId>-->
+		    <!--<version>${httpcomponents.version}</version>-->
+		<!--</dependency>-->
 
 	</dependencies>
 	<build>

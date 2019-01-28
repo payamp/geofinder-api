@@ -46,7 +46,7 @@ public class LocationFinderController {
 			messages.add("lat parameter was null");
 		}
 		
-		// validate the parameter lat (latitude)
+		// validate the parameter lng (longitude)
 		try {
 			lngDouble = Double.parseDouble(lng);
 			if( lngDouble < -180.0d  || lngDouble > 180.0d  ){
