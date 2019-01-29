@@ -39,6 +39,8 @@ public class DseConfig {
 			this.dseCluster = builder.addContactPoint("localhost").build();
 
 		} else {
+
+			builder.addContactPoint(App.HOST);
 			
 			if( App.CASSANDRA_USER != null && App.CASSANDRA_PASS != null ){
 
