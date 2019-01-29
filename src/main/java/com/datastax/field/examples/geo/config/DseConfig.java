@@ -51,9 +51,9 @@ public class DseConfig {
 					builder.withSSL();
 				 }
 
-				this.dseCluster = builder.build();
 			}
 
+			this.dseCluster = builder.build();
 		}
 
 		return this.dseCluster;
