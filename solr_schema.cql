@@ -5,7 +5,7 @@ This will work on DSE 5.1+ but it will only do the right thing in DSE 6.7+ (test
 DSE 6.7.0 will use the JTS RPT (RecursivePrefixTree) type
 
 */
-CREATE SEARCH INDEX ON simplegGeo.locations WITH OPTIONS {reindex: false, lenient: true};
+CREATE SEARCH INDEX ON simplegeo.locations WITH OPTIONS {reindex: false, lenient: true};
 
 /* turn indexing off for name */
 ALTER SEARCH INDEX SCHEMA ON simplegeo.locations SET fields.field[@name='name'] @indexed='false';
