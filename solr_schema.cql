@@ -1,5 +1,10 @@
 
-/* This will work on any version of DSE but it will only do the right thing in DSE 6.7 which is to use the JTS, RPT (RecursivePrefixTree) type */
+/*
+This will work on DSE 5.1+ but it will only do the right thing in DSE 6.7+ (tested on DSE 6.7.0)
+
+DSE 6.7.0 will use the JTS RPT (RecursivePrefixTree) type
+
+*/
 CREATE SEARCH INDEX ON simplegGeo.locations WITH OPTIONS {reindex: false, lenient: true};
 
 /* turn indexing off for name */
