@@ -15,7 +15,7 @@ Will insert a demo video here.
 
 DSE running, and already loaded the sample data into DSE that is backed by DSE Search.
 - Java 8 installed 
-- maven is installed (only if you are building the project)
+- maven
 
 
 
@@ -23,7 +23,7 @@ DSE running, and already loaded the sample data into DSE that is backed by DSE S
 
 **build:**
 
-`git clone`
+`git clone https://github.com/payamp/geofinder-api.git`
 
 `mvn clean package`
 
@@ -37,22 +37,31 @@ usage: java -jar geofinder-api.jar
  -u,--user <arg>       Cassandra username
 ```
 
-Connecting to local DSE instance:
+##Connecting app to DSE
+
+
+### SSL with authentication enabled example:
+
+```java -Djavax.net.ssl.trustStore=/path/to/client.truststore -Djavax.net.ssl.trustStorePassword=password -jar target/geofinder-api.jar -h 192.168.1.190 -u cassandra -p ChangeMe123 -ssl```
+
+If you installed using OpsCenter LCM, you will find the truststore here:
+
+`/etc/dse/keystores/client.truststore`
+
+
+### using localhost *without* auth or SSL:
 
 `java -jar target/geofinder-api.jar -h localhost`
 
 
-Connecting to remote DSE instance w/ username, password authentication and SSL
-
-`java -jar target/geofinder-api.jar -h 192.168.1.190 -u cassandra -p ChangeMe123 -ssl`
-
-This expects a valid truststore.jks file to be in the current working directory. 
+### User interface
 
 The web app is exposed on port 9000
 
 If you are running this from assethub, you will need to point your web browser at:
 
-http://node0_ip:9000
+http://node0:9000/
+
 
 ---
 

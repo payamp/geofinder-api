@@ -112,14 +112,7 @@ public String nameSearchWithPointAndRadiusQuery( String name, double lat, double
 		JsonArray results = new JsonArray();
 		
 		String query = nameSearchWithPointAndRadiusQuery(name, lat, lng, radiusInKm);
-		System.out.println(query);
-		ResultSet resultSet = this.dseSession.execute(query);
-		for( Row row: resultSet.all() ){
-
-			JsonObject locObj = locationRowToJsonObject(row);
-			results.add(locObj);
-		}
-		return results;
+		return getJsonElements(results, query);
 	}
 	
 	public String geoFilterPivotOnCateogoryQuery(double lllat, double lllng, double urlat, double urlng){
@@ -208,18 +201,24 @@ public String nameSearchWithPointAndRadiusQuery( String name, double lat, double
 		JsonArray results = new JsonArray();
 		String query = geoFilterLocationsOnCateogoryAndOrSubcategoryQuery(category, subcategory, numRows, lllat, lllng, urlat, urlng);
 
+		return getJsonElements(results, query);
+	}
+
+
+	private JsonArray getJsonElements(JsonArray results, String query) {
 		System.out.println(query);
-		
+
 		ResultSet resultSet = this.dseSession.execute(query);
-		
+
 		for( Row row: resultSet.all() ){
-			
+
 			JsonObject locObj = locationRowToJsonObject(row);
 			results.add(locObj);
 		}
 		return results;
 	}
-	
+
+
 	private JsonObject locationRowToJsonObject( Row row ){
 		JsonObject locObj = new JsonObject();
 		

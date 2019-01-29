@@ -68,7 +68,8 @@ public class App
         }
     }
    
-    
+
+
     public static Options cliOptions(){
     	Options o = new Options();
     	o.addOption("h", "hostname", true, "cassandra host (required)");
